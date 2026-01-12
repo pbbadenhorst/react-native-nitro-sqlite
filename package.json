@@ -60,9 +60,6 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "dependencies": {
-    "typeorm": "^0.3.20"
-  },
   "devDependencies": {
     "jest": "*",
     "react": "*",
