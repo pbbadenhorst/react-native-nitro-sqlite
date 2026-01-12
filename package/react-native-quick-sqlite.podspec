@@ -3,6 +3,10 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -Wno-comma -Wno-shorten-64-to-32'
 
+# Custom SQLite compile-time flags (e.g., "-DSQLITE_MAX_ATTACHED=125")
+sqlite_flags = ENV['QUICK_SQLITE_FLAGS'] || ''
+base_preprocessor_definitions = "HAVE_FULLFSYNC=1 #{sqlite_flags}".strip
+
 Pod::Spec.new do |s|
   s.name         = "react-native-quick-sqlite"
   s.version      = package["version"]
@@ -18,7 +22,7 @@ Pod::Spec.new do |s|
     s.source_files = "ios/**/*.{h,hpp,m,mm}", "cpp/**/*.{h,cpp,c}"
 
   s.pod_target_xcconfig = {
-    :GCC_PREPROCESSOR_DEFINITIONS => "HAVE_FULLFSYNC=1",
+    :GCC_PREPROCESSOR_DEFINITIONS => base_preprocessor_definitions,
     :WARNING_CFLAGS => "-Wno-shorten-64-to-32 -Wno-comma -Wno-unreachable-code -Wno-conditional-uninitialized -Wno-deprecated-declarations",
     :USE_HEADERMAP => "No"
   }
@@ -36,6 +40,7 @@ Pod::Spec.new do |s|
     if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
       s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
       s.pod_target_xcconfig    = {
+          "GCC_PREPROCESSOR_DEFINITIONS" => base_preprocessor_definitions,
           "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
           "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
           "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
