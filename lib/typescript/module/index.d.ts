@@ -1,0 +1,122 @@
+declare global {
+    function nativeCallSyncHook(): unknown;
+    var RN$Bridgeless: boolean | undefined;
+    var __QuickSQLiteProxy: object | undefined;
+}
+export declare const QuickSQLite: ISQLite;
+/**
+ * Object returned by SQL Query executions {
+ *  insertId: Represent the auto-generated row id if applicable
+ *  rowsAffected: Number of affected rows if result of a update query
+ *  message: if status === 1, here you will find error description
+ *  rows: if status is undefined or 0 this object will contain the query results
+ * }
+ *
+ * @interface QueryResult
+ */
+export interface QueryResult {
+    insertId?: number;
+    rowsAffected: number;
+    rows?: {
+        /** Raw array with all dataset */
+        _array: any[];
+        /** The lengh of the dataset */
+        length: number;
+        /** A convenience function to acess the index based the row object
+         * @param idx the row index
+         * @returns the row structure identified by column names
+         */
+        item: (idx: number) => any;
+    };
+    /**
+     * Query metadata, avaliable only for select query results
+     */
+    metadata?: ColumnMetadata[];
+}
+/**
+ * Column metadata
+ * Describes some information about columns fetched by the query
+ */
+export interface ColumnMetadata {
+    /** The name used for this column for this resultset */
+    columnName: string;
+    /** The declared column type for this column, when fetched directly from a table or a View resulting from a table column. "UNKNOWN" for dynamic values, like function returned ones. */
+    columnDeclaredType: string;
+    /**
+     * The index for this column for this resultset*/
+    columnIndex: number;
+}
+/**
+ * Allows the execution of bulk of sql commands
+ * inside a transaction
+ * If a single query must be executed many times with different arguments, its preferred
+ * to declare it a single time, and use an array of array parameters.
+ */
+export type SQLBatchTuple = [string] | [string, any[] | any[][]];
+/**
+ * status: 0 or undefined for correct execution, 1 for error
+ * message: if status === 1, here you will find error description
+ * rowsAffected: Number of affected rows if status == 0
+ */
+export interface BatchQueryResult {
+    rowsAffected?: number;
+}
+/**
+ * Result of loading a file and executing every line as a SQL command
+ * Similar to BatchQueryResult
+ */
+export interface FileLoadResult extends BatchQueryResult {
+    commands?: number;
+}
+export interface Transaction {
+    commit: () => QueryResult;
+    execute: (query: string, params?: any[]) => QueryResult;
+    executeAsync: (query: string, params?: any[]) => Promise<QueryResult>;
+    rollback: () => QueryResult;
+}
+export interface PendingTransaction {
+    start: () => void;
+}
+interface ISQLite {
+    open: (dbName: string, location?: string) => void;
+    close: (dbName: string) => void;
+    delete: (dbName: string, location?: string) => void;
+    attach: (mainDbName: string, dbNameToAttach: string, alias: string, location?: string) => void;
+    detach: (mainDbName: string, alias: string) => void;
+    transaction: (dbName: string, fn: (tx: Transaction) => Promise<void> | void) => Promise<void>;
+    execute: (dbName: string, query: string, params?: any[]) => QueryResult;
+    executeAsync: (dbName: string, query: string, params?: any[]) => Promise<QueryResult>;
+    executeBatch: (dbName: string, commands: SQLBatchTuple[]) => BatchQueryResult;
+    executeBatchAsync: (dbName: string, commands: SQLBatchTuple[]) => Promise<BatchQueryResult>;
+    loadFile: (dbName: string, location: string) => FileLoadResult;
+    loadFileAsync: (dbName: string, location: string) => Promise<FileLoadResult>;
+}
+/**
+ * DO NOT USE THIS! THIS IS MEANT FOR TYPEORM
+ * If you are looking for a convenience wrapper use `connect`
+ */
+export declare const typeORMDriver: {
+    openDatabase: (options: {
+        name: string;
+        location?: string;
+    }, ok: (db: any) => void, fail: (msg: string) => void) => any;
+};
+export interface QuickSQLiteConnection {
+    close: () => void;
+    delete: () => void;
+    attach: (dbNameToAttach: string, alias: string, location?: string) => void;
+    detach: (alias: string) => void;
+    transaction: (fn: (tx: Transaction) => Promise<void> | void) => Promise<void>;
+    execute: (query: string, params?: any[]) => QueryResult;
+    executeAsync: (query: string, params?: any[]) => Promise<QueryResult>;
+    executeBatch: (commands: SQLBatchTuple[]) => BatchQueryResult;
+    executeBatchAsync: (commands: SQLBatchTuple[]) => Promise<BatchQueryResult>;
+    loadFile: (location: string) => FileLoadResult;
+    loadFileAsync: (location: string) => Promise<FileLoadResult>;
+}
+export declare const open: (options: {
+    name: string;
+    location?: string;
+}) => QuickSQLiteConnection;
+export {};
+//# sourceMappingURL=index.d.ts.map
