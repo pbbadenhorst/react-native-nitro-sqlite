@@ -1,11 +1,51 @@
 {
-  "name": "react-native-quick-sqlite-workspace",
-  "version": "8.2.3",
-  "packageManager": "bun@1.1.21",
-  "private": "true",
-  "workspaces": [
-    "package",
-    "example"
+  "name": "react-native-quick-sqlite",
+  "version": "8.2.7",
+  "description": "Fast SQLite for react-native",
+  "source": "./src/index.ts",
+  "main": "./lib/commonjs/index",
+  "module": "./lib/module/index",
+  "types": "./lib/typescript/commonjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/typescript/module/index.d.ts",
+        "default": "./lib/module/index.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/index.d.ts",
+        "default": "./lib/commonjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "react-native-quick-sqlite.podspec",
+    "!lib/typescript/example",
+    "!android/build",
+    "!android/.cxx",
+    "!ios/build",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "scripts": {
+    "postinstall": "bun build || exit 0;",
+    "build": "bun typescript && bob build",
+    "typescript": "tsc --noEmit",
+    "lint": "eslint \"**/*.{js,ts,tsx}\" --fix",
+    "lint-ci": "eslint \"**/*.{js,ts,tsx}\" -f @jamesacarr/github-actions",
+    "test": "jest",
+    "release": "release-it"
+  },
+  "keywords": [
+    "react-native",
+    "ios",
+    "android"
   ],
   "repository": {
     "type": "git",
@@ -17,107 +57,69 @@
     "url": "https://github.com/margelo/react-native-quick-sqlite/issues"
   },
   "homepage": "https://github.com/margelo/react-native-quick-sqlite#readme",
-  "scripts": {
-    "postinstall": "patch-package",
-    "typescript": "bun --filter=\"**\" typescript",
-    "lint": "bun package lint && bun example lint",
-    "lint-cpp": "./scripts/clang-format.sh",
-    "clean": "rm -rf **/tsconfig.tsbuildinfo node_modules package/node_module package/lib",
-    "release": "./scripts/release.sh",
-    "package": "bun --cwd package",
-    "example": "bun --cwd example"
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
-    "patch-package": "^8.0.0",
-    "react": "18.3.1",
-    "react-native": "0.76.1"
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/plugin-proposal-decorators": "^7.20.5",
-    "@babel/preset-env": "^7.25.4",
-    "@babel/runtime": "^7.25.4",
-    "@eslint/js": "^9.10.0",
-    "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
-    "@react-native/babel-preset": "0.76.1",
-    "@react-native/eslint-config": "0.76.1",
-    "@react-native/metro-config": "0.76.1",
-    "@react-native/typescript-config": "0.76.1",
-    "@release-it/bumper": "^6.0.1",
-    "@release-it/conventional-changelog": "^8.0.2",
-    "@tsconfig/react-native": "^2.0.2",
-    "@types/eslint__js": "^8.42.3",
-    "@types/jest": "^29.5.13",
-    "@types/react": "^18.3.4",
-    "babel-jest": "^29.6.3",
-    "babel-plugin-module-resolver": "^5.0.2",
-    "babel-plugin-transform-typescript-metadata": "^0.3.2",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "jest": "^29.7.0",
-    "prettier": "^3.3.3",
-    "release-it": "^17.10.0",
-    "typescript": "~5.5.4",
-    "typescript-eslint": "^8.13.0"
+    "jest": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-builder-bob": "^0.31.0"
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-native": ">=0.74.0"
+  },
+  "resolutions": {
+    "@types/react": "^18.2.44"
+  },
+  "jest": {
+    "preset": "react-native",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/example/node_modules",
+      "<rootDir>/lib/"
+    ]
   },
   "release-it": {
-    "npm": false,
-    "git": {
-      "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}",
-      "requireCleanWorkingDir": false
+    "npm": {
+      "publish": true
     },
+    "git": false,
     "github": {
-      "release": true
+      "release": false
     },
     "hooks": {
-      "before:release": "bun example bundle-install && bun example pods && git add example/ios/Podfile.lock"
-    },
-    "plugins": {
-      "@release-it/bumper": {
-        "out": [
-          {
-            "file": "example/package.json",
-            "path": "version"
-          },
-          {
-            "file": "example/package.json",
-            "path": "dependencies.react-native-quick-sqlite"
-          }
-        ]
-      },
-      "@release-it/conventional-changelog": {
-        "preset": {
-          "name": "conventionalcommits",
-          "types": [
-            {
-              "type": "feat",
-              "section": "✨ Features"
-            },
-            {
-              "type": "perf",
-              "section": "💨 Performance Improvements"
-            },
-            {
-              "type": "fix",
-              "section": "🐛 Bug Fixes"
-            },
-            {
-              "type": "chore",
-              "section": "🏗️ Project configuration and build flow"
-            },
-            {
-              "type": "chore(deps)",
-              "section": "🛠️ Dependency Upgrades"
-            },
-            {
-              "type": "docs",
-              "section": "📚 Documentation"
-            }
-          ]
-        }
-      }
+      "before:init": "bun typescript && bun lint",
+      "after:bump": "bun run build"
     }
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "commonjs",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "tsc": "tsc",
+          "project": "tsconfig.build.json",
+          "esm": true
+        }
+      ]
+    ]
   }
 }
