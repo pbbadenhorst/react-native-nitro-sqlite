@@ -67,3 +67,11 @@ target_compile_options(
   -Wall
   -DONANDROID
 )
+
+# Support 16KB page sizes (required for Android 15+ devices)
+# https://developer.android.com/16kb-page-size
+target_link_options(
+  ${CMAKE_PROJECT_NAME}
+  PRIVATE
+  "-Wl,-z,max-page-size=16384"
+)
